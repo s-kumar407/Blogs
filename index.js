@@ -5,6 +5,7 @@ const path = require("path");
 const User = require("./db/User");
 const Blog = require("./db/Blog");
 const cors = require("cors");
+const bcrypt = require('bcrypt');
 
 const app = express();
 const Jwt = require("jsonwebtoken");
@@ -13,6 +14,7 @@ require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -35,9 +37,26 @@ const secondStorage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const secondUpload = multer({ storage: secondStorage });
 
+const saltRounds = 10;
+
+async function hashPassword(plainPassword) {
+  try {
+    const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
+    return hashedPassword;
+  } catch (err) {
+    console.error("Error hashing password:", err);
+    throw err;
+  }
+}
+
+
+
+
 app.post("/signup", upload.single("profileImage"), async (req, res) => {
   try {
-    const user = new User({ ...req.body, imageName: req.file.filename });
+    const {password} = req.body;
+    const hashPass = await hashPassword(password);
+    const user = new User({ ...req.body,password:hashPass, imageName: req.file.filename });
     let result = await user.save();
     result = result.toObject();
     delete result.password;
@@ -67,11 +86,28 @@ app.post("/signup", upload.single("profileImage"), async (req, res) => {
 
 app.use("/usersProfilePics", express.static("usersProfilePics"));
 
+
+async function comparePasswords(plainPassword, hashedPassword) {
+  try {
+    const match = await bcrypt.compare(plainPassword, hashedPassword);
+    return match; 
+  } catch (err) {
+    console.error("Error comparing passwords:", err);
+    throw err;
+  }
+}
+
+
+
 app.post("/login", async (req, res) => {
   try {
     if (req.body.email && req.body.password) {
-      let user = await User.findOne(req.body).select("-password");
-      if (user) {
+      let user = await User.findOne({ email: req.body.email });
+      const isMatch = comparePasswords(req.body.password,user.password)
+      user = user.toObject();
+      delete user.password;
+      if (isMatch && user) {
+        
         Jwt.sign(
           { user },
           process.env.JWT_KEY,
