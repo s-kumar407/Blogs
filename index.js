@@ -13,7 +13,11 @@ const Jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin:[`${process.env.FRONTEND_URI}`],
+  methods:["POST","GET","PUT","DELETE"],
+  credentials:true
+}));
 
 
 const storage = multer.diskStorage({
@@ -50,7 +54,9 @@ async function hashPassword(plainPassword) {
 }
 
 
-
+app.get("/",(req,res)=>{
+  res.json("Hello");
+})
 
 app.post("/signup", upload.single("profileImage"), async (req, res) => {
   try {
