@@ -58,6 +58,10 @@ app.get("/",(req,res)=>{
   res.json("Hello");
 })
 
+app.get("/favicon.ico",(req,res)=>{
+  res.json("no icon");
+})
+
 app.post("/signup", upload.single("profileImage"), async (req, res) => {
   try {
     const {password} = req.body;
