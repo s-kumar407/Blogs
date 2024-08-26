@@ -14,7 +14,7 @@ require("dotenv").config();
 
 app.use(express.json());
 app.use(cors({
-  origin:[`${process.env.FRONTEND_URI}:${process.env.PORT}`],
+  origin:[`${process.env.FRONTEND_URI}`],
   methods:["POST","GET","PUT","DELETE"],
   credentials:true
 }));
