@@ -113,6 +113,7 @@ app.post("/login", async (req, res) => {
   try {
     if (req.body.email && req.body.password) {
       let user = await User.findOne({ email: req.body.email });
+      console.log(user);
       const isMatch = comparePasswords(req.body.password,user.password)
       user = user.toObject();
       delete user.password;
