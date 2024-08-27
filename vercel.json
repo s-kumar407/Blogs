@@ -8,8 +8,17 @@
   ],
   "routes": [
     {
+      "src": "/usersProfilePics/(.*)",
+      "dest": "/usersProfilePics/$1"
+    },
+    {
+      "src": "/blogPics/(.*)",
+      "dest": "/blogPics/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }
   ]
 }
+
